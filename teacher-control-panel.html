@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Teacher Control Panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 30px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background particles */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .panel {
+            width: 100%;
+            max-width: 1000px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px 35px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.1); opacity: 0.5; }
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-icon {
+            font-size: 32px;
+            animation: rotate 3s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .status-badge {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #4ade80;
+            border-radius: 50%;
+            animation: blink 2s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .tabs-container {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .tab-btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .tab-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(30, 60, 114, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stats-bar {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1e3c72;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        .alerts-container {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            min-height: 400px;
+        }
+
+        .alerts-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .alerts-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e3c72;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-btn {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .filter-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .filter-btn.active {
+            background: #1e3c72;
+            color: white;
+        }
+
+        .placeholder {
+            color: #999;
+            text-align: center;
+            padding: 60px 20px;
+            font-size: 16px;
+        }
+
+        .placeholder-icon {
+            font-size: 64px;
+            opacity: 0.3;
+            margin-bottom: 15px;
+        }
+
+        .alert-card {
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .alert-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 6px;
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .alert-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+        }
+
+        .warning {
+            background: linear-gradient(135deg, #fffbf0 0%, #fff8e1 100%);
+        }
+
+        .warning::before {
+            background: linear-gradient(180deg, #f4b400 0%, #ff9800 100%);
+        }
+
+        .critical {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffeaea 100%);
+        }
+
+        .critical::before {
+            background: linear-gradient(180deg, #e53935 0%, #c62828 100%);
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .status {
+            font-weight: 700;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+
+        .warning .status {
+            background: #f4b400;
+            color: white;
+        }
+
+        .critical .status {
+            background: #e53935;
+            color: white;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .details {
+            font-size: 15px;
+            color: #333;
+            margin-top: 6px;
+        }
+
+        .details strong {
+            color: #1e3c72;
+            font-weight: 600;
+        }
+
+        .details em {
+            color: #e53935;
+            font-style: normal;
+            font-weight: 500;
+        }
+
+        .timestamp {
+            font-size: 12px;
+            color: #999;
+            margin-top: 6px;
+        }
+
+        .flag-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .flag-count {
+            font-weight: 700;
+            background: rgba(0,0,0,0.05);
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 16px;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #1e3c72;
+            color: white;
+        }
+
+        .action-btn:hover {
+            background: #2a5298;
+            transform: scale(1.05);
+        }
+
+        .critical .action-btn {
+            background: #e53935;
+        }
+
+        .critical .action-btn:hover {
+            background: #c62828;
+        }
+
+        /* Modal for critical alerts */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 35px;
+            border-radius: 16px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+            animation: scaleIn 0.3s ease;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            font-size: 22px;
+            font-weight: 700;
+            color: #e53935;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-body {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn.primary {
+            background: #e53935;
+            color: white;
+        }
+
+        .modal-btn.primary:hover {
+            background: #c62828;
+        }
+
+        .modal-btn.secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .modal-btn.secondary:hover {
+            background: #e0e0e0;
+        }
+
+        /* Student View Styles */
+        .students-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 10px 0;
+        }
+
+        .student-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .student-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+        }
+
+        .student-card.high-risk {
+            border-color: #e53935;
+            background: linear-gradient(135deg, #fff5f5 0%, white 100%);
+        }
+
+        .student-card.medium-risk {
+            border-color: #f4b400;
+            background: linear-gradient(135deg, #fffbf0 0%, white 100%);
+        }
+
+        .student-card.low-risk {
+            border-color: #4ade80;
+            background: linear-gradient(135deg, #f0fdf4 0%, white 100%);
+        }
+
+        .student-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .student-info {
+            flex: 1;
+        }
+
+        .student-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e3c72;
+            margin-bottom: 5px;
+        }
+
+        .student-id {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .risk-badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .risk-badge.high {
+            background: #e53935;
+            color: white;
+        }
+
+        .risk-badge.medium {
+            background: #f4b400;
+            color: white;
+        }
+
+        .risk-badge.low {
+            background: #4ade80;
+            color: white;
+        }
+
+        .student-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .student-stat {
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .student-stat-number {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e3c72;
+            display: block;
+        }
+
+        .student-stat-label {
+            font-size: 11px;
+            color: #666;
+            margin-top: 3px;
+            font-weight: 500;
+        }
+
+        .student-recent {
+            margin-top: 15px;
+        }
+
+        .student-recent-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .student-alert-item {
+            font-size: 12px;
+            padding: 8px 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .student-alert-item.critical-item {
+            background: #ffeaea;
+            border-left: 3px solid #e53935;
+        }
+
+        .student-alert-item.warning-item {
+            background: #fff8e1;
+            border-left: 3px solid #f4b400;
+        }
+
+        .student-alert-text {
+            flex: 1;
+        }
+
+        .student-alert-time {
+            font-size: 10px;
+            color: #999;
+        }
+
+        .view-student-btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #1e3c72;
+            color: white;
+            margin-top: 15px;
+        }
+
+        .view-student-btn:hover {
+            background: #2a5298;
+            transform: scale(1.02);
+        }
+
+        .no-students {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .stats-bar {
+                grid-template-columns: 1fr;
+            }
+
+            .alert-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .flag-info {
+                width: 100%;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .filter-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .tabs-container {
+                overflow-x: auto;
+            }
+
+            .students-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="panel">
+    <div class="header">
+        <div class="header-content">
+            <h1>
+                <span class="header-icon">🎯</span>
+                Teacher Control Panel
+            </h1>
+            <div class="status-badge">
+                <span class="status-dot"></span>
+                Live Monitoring
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-bar">
+        <div class="stat-item">
+            <span class="stat-number" id="totalAlerts">0</span>
+            <span class="stat-label">Total Alerts</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number" id="criticalCount">0</span>
+            <span class="stat-label">Critical Flags</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number" id="warningCount">0</span>
+            <span class="stat-label">Warnings</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number" id="studentCount">0</span>
+            <span class="stat-label">Students Monitored</span>
+        </div>
+    </div>
+
+    <div class="tabs-container">
+        <button class="tab-btn active" data-tab="alerts">Alert Feed</button>
+        <button class="tab-btn" data-tab="students">Students View</button>
+    </div>
+
+    <!-- Alert Feed Tab -->
+    <div class="tab-content active" id="alerts-tab">
+        <div class="alerts-container">
+            <div class="alerts-header">
+                <div class="alerts-title">Recent Activity</div>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="critical">Critical</button>
+                    <button class="filter-btn" data-filter="warning">Warning</button>
+                </div>
+            </div>
+            <div id="alerts">
+                <div class="placeholder">
+                    <div class="placeholder-icon">📊</div>
+                    <div>Waiting for signals...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Students View Tab -->
+    <div class="tab-content" id="students-tab">
+        <div class="alerts-container">
+            <div class="alerts-header">
+                <div class="alerts-title">Student Overview</div>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-student-filter="all">All</button>
+                    <button class="filter-btn" data-student-filter="high">High Risk</button>
+                    <button class="filter-btn" data-student-filter="medium">Medium Risk</button>
+                    <button class="filter-btn" data-student-filter="low">Low Risk</button>
+                </div>
+            </div>
+            <div id="students-container" class="students-grid">
+                <div class="no-students">
+                    <div class="placeholder-icon">👥</div>
+                    <div>No student data yet...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for critical alerts -->
+<div class="modal" id="criticalModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            ⚠️ High Risk Detected
+        </div>
+        <div class="modal-body" id="modalBody">
+            A student has triggered multiple critical alerts. Would you like to open their webcam feed for monitoring?
+        </div>
+        <div class="modal-actions">
+            <button class="modal-btn secondary" onclick="closeModal()">Dismiss</button>
+            <button class="modal-btn primary" onclick="openWebcam()">Open Webcam</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+    const socket = io('http://localhost:5000');
+    const container = document.getElementById('alerts');
+    
+    let totalAlerts = 0;
+    let criticalCount = 0;
+    let warningCount = 0;
+    let currentFilter = 'all';
+    let studentData = {}; // Store data for each student
+
+    // Tab functionality
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabName = btn.dataset.tab;
+            
+            // Update active tab button
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Update active tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabName + '-tab').classList.add('active');
+        });
+    });
+
+    // Alert filter functionality
+    document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn[data-filter]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.dataset.filter;
+            filterAlerts();
+        });
+    });
+
+    // Student filter functionality
+    document.querySelectorAll('.filter-btn[data-student-filter]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn[data-student-filter]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const filter = btn.dataset.studentFilter;
+            filterStudents(filter);
+        });
+    });
+
+    function filterAlerts() {
+        const cards = document.querySelectorAll('.alert-card');
+        cards.forEach(card => {
+            if (currentFilter === 'all') {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = card.classList.contains(currentFilter) ? 'flex' : 'none';
+            }
+        });
+    }
+
+    function filterStudents(filter) {
+        const cards = document.querySelectorAll('.student-card');
+        cards.forEach(card => {
+            if (filter === 'all') {
+                card.style.display = 'block';
+            } else {
+                card.style.display = card.classList.contains(filter + '-risk') ? 'block' : 'none';
+            }
+        });
+    }
+
+    function updateStats() {
+        document.getElementById('totalAlerts').textContent = totalAlerts;
+        document.getElementById('criticalCount').textContent = criticalCount;
+        document.getElementById('warningCount').textContent = warningCount;
+        document.getElementById('studentCount').textContent = Object.keys(studentData).length;
+    }
+
+    function getCurrentTime() {
+        const now = new Date();
+        return now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function getRiskLevel(flagCount) {
+        if (flagCount >= 5) return 'high';
+        if (flagCount >= 3) return 'medium';
+        return 'low';
+    }
+
+    function updateStudentData(studentName, event, flagCount, isCritical) {
+        if (!studentData[studentName]) {
+            studentData[studentName] = {
+                name: studentName,
+                totalFlags: 0,
+                criticalAlerts: 0,
+                warningAlerts: 0,
+                recentAlerts: []
+            };
+        }
+
+        const student = studentData[studentName];
+        student.totalFlags = flagCount;
+        
+        if (isCritical) {
+            student.criticalAlerts++;
+        } else {
+            student.warningAlerts++;
+        }
+
+        student.recentAlerts.unshift({
+            event: event,
+            time: getCurrentTime(),
+            isCritical: isCritical
+        });
+
+        // Keep only last 3 alerts
+        if (student.recentAlerts.length > 3) {
+            student.recentAlerts = student.recentAlerts.slice(0, 3);
+        }
+
+        renderStudents();
+    }
+
+    function renderStudents() {
+        const studentsContainer = document.getElementById('students-container');
+        const noStudents = studentsContainer.querySelector('.no-students');
+        
+        if (Object.keys(studentData).length === 0) {
+            if (!noStudents) {
+                studentsContainer.innerHTML = `
+                    <div class="no-students">
+                        <div class="placeholder-icon">👥</div>
+                        <div>No student data yet...</div>
+                    </div>
+                `;
+            }
+            return;
+        }
+
+        if (noStudents) {
+            noStudents.remove();
+        }
+
+        studentsContainer.innerHTML = '';
+
+        Object.values(studentData).forEach(student => {
+            const riskLevel = getRiskLevel(student.totalFlags);
+            
+            const card = document.createElement('div');
+            card.className = `student-card ${riskLevel}-risk`;
+            
+            card.innerHTML = `
+                <div class="student-header">
+                    <div class="student-info">
+                        <div class="student-name">${student.name}</div>
+                        <div class="student-id">ID: ${student.name.substring(0, 3).toUpperCase()}-${Math.floor(Math.random() * 1000)}</div>
+                    </div>
+                    <div class="risk-badge ${riskLevel}">${riskLevel.toUpperCase()}</div>
+                </div>
+                
+                <div class="student-stats">
+                    <div class="student-stat">
+                        <span class="student-stat-number">${student.totalFlags}</span>
+                        <span class="student-stat-label">Total Flags</span>
+                    </div>
+                    <div class="student-stat">
+                        <span class="student-stat-number">${student.criticalAlerts}</span>
+                        <span class="student-stat-label">Critical</span>
+                    </div>
+                    <div class="student-stat">
+                        <span class="student-stat-number">${student.warningAlerts}</span>
+                        <span class="student-stat-label">Warnings</span>
+                    </div>
+                </div>
+                
+                <div class="student-recent">
+                    <div class="student-recent-title">Recent Activity</div>
+                    ${student.recentAlerts.map(alert => `
+                        <div class="student-alert-item ${alert.isCritical ? 'critical-item' : 'warning-item'}">
+                            <span class="student-alert-text">${alert.event}</span>
+                            <span class="student-alert-time">${alert.time}</span>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <button class="view-student-btn" onclick="viewStudentDetails('${student.name}')">
+                    View Full History
+                </button>
+            `;
+            
+            studentsContainer.appendChild(card);
+        });
+    }
+
+    function viewStudentDetails(studentName) {
+        const student = studentData[studentName];
+        if (!student) return;
+
+        alert(`Detailed view for ${studentName}\n\nTotal Flags: ${student.totalFlags}\nCritical Alerts: ${student.criticalAlerts}\nWarning Alerts: ${student.warningAlerts}\n\nThis would open a detailed student monitoring view.`);
+    }
+
+    socket.on('teacher-alert', (data) => {
+        const isCritical = data.flagCount >= 3;
+        const statusText = isCritical ? "CRITICAL" : "WARNING";
+        const statusClass = isCritical ? "critical" : "warning";
+
+        totalAlerts++;
+        if (isCritical) {
+            criticalCount++;
+        } else {
+            warningCount++;
+        }
+
+        // Update student data
+        updateStudentData(data.student, data.event, data.flagCount, isCritical);
+        updateStats();
+
+        const card = document.createElement('div');
+        card.className = `alert-card ${statusClass}`;
+
+        card.innerHTML = `
+            <div class="alert-content">
+                <div class="status">${statusText}</div>
+                <div class="details">
+                    <strong>${data.student}</strong> performed <em>${data.event}</em>
+                </div>
+                <div class="timestamp">${getCurrentTime()}</div>
+            </div>
+            <div class="flag-info">
+                <div class="flag-count">
+                    🚩 ${data.flagCount}
+                </div>
+                <button class="action-btn" onclick="handleAction('${data.student}', ${isCritical})">
+                    ${isCritical ? 'View Feed' : 'Review'}
+                </button>
+            </div>
+        `;
+
+        // Remove placeholder text
+        const placeholder = container.querySelector('.placeholder');
+        if (placeholder) placeholder.remove();
+
+        container.prepend(card);
+
+        // Apply filter
+        filterAlerts();
+
+        if (isCritical) {
+            showCriticalModal(data.student, data.event);
+        }
+    });
+
+    function handleAction(student, isCritical) {
+        if (isCritical) {
+            showCriticalModal(student, 'suspicious activity');
+        } else {
+            alert(`Reviewing activity for ${student}...`);
+        }
+    }
+
+    function showCriticalModal(student, event) {
+        const modal = document.getElementById('criticalModal');
+        const modalBody = document.getElementById('modalBody');
+        modalBody.innerHTML = `<strong>${student}</strong> has triggered multiple critical alerts for <em>${event}</em>. Would you like to open their webcam feed for monitoring?`;
+        modal.classList.add('show');
+    }
+
+    function closeModal() {
+        document.getElementById('criticalModal').classList.remove('show');
+    }
+
+    function openWebcam() {
+        alert('Opening webcam feed...');
+        closeModal();
+    }
+
+    // Close modal on outside click
+    document.getElementById('criticalModal').addEventListener('click', (e) => {
+        if (e.target.id === 'criticalModal') {
+            closeModal();
+        }
+    });
+</script>
+
+</body>
+</html>
